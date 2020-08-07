@@ -168,21 +168,21 @@ static mraa_result_t pwm_init_raw_replace(mraa_pwm_context dev, int pin)
 			}
 			if((fd = open("/sys/class/gpio/unexport", O_WRONLY)) != -1)
 			{
-				i = sprintf(buffer,"%d",base2 + pin);
+				i = snprintf(buffer, sizeof(buffer), "%d",base2 + pin);
 				write(fd, buffer, i);
 				close(fd);
 			}
 			if((fd = open("/sys/class/gpio/export", O_WRONLY)) != -1)
 			{
-				i = sprintf(buffer,"%d",base2 + pin);
+				i = snprintf(buffer,"%d",base2 + pin);
 				write(fd, buffer, i);
 				close(fd);
-				sprintf(buffer,"/sys/class/gpio/gpio%d/direction",base2 + pin);
+				snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/direction",base2 + pin);
 				if((fd = open(buffer, O_WRONLY)) != -1)
 				{
 					write(fd, "out", 3);
 					close(fd);
-					sprintf(buffer,"/sys/class/gpio/gpio%d/value",base2 + pin);
+					snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/value",base2 + pin);
 					if((fd = open(buffer, O_WRONLY)) != -1)
 					{
 						write(fd, "0", 1);
@@ -272,7 +272,7 @@ static mraa_result_t gpio_init_pre(int pin)
                 {
                         if(read(_fd, &(rx_tx_buf[1]), 1) == 1)
                         {
-                                rx_tx_buf[1] &= ~(1 < (pin % 8));
+                                rx_tx_buf[1] &= ~(1 << (pin % 8));
                                 write(_fd, &rx_tx_buf[0], 2);
                         }
                 }
@@ -282,11 +282,11 @@ static mraa_result_t gpio_init_pre(int pin)
                 {
                         if(read(_fd, &(rx_tx_buf[1]), 1) == 1)
                         {
-                                rx_tx_buf[1] &= ~(1 < (pin % 8));
+                                rx_tx_buf[1] &= ~(1 << (pin % 8));
                                 write(_fd, &rx_tx_buf[0], 2);
                                 if((fd = open("/sys/class/gpio/unexport", O_WRONLY)) != -1)
                                 {
-                                        i = sprintf(buffer,"%d",base2 + pin);
+                                        i = snprintf(buffer, sizeof(buffer), "%d",base2 + pin);
                                         write(fd, buffer, i);
                                         close(fd);
                                 }
@@ -306,7 +306,7 @@ static int sx150x_init()
 
         for(i = 0; i < 999; i++)
 	{
-		sprintf(rx_tx_buf,"/sys/class/gpio/gpiochip%d/device/name",i);
+		snprintf(rx_tx_buf, sizeof(rx_tx_buf), "/sys/class/gpio/gpiochip%d/device/name",i);
 		if((fd = open(rx_tx_buf, O_RDONLY)) != -1)
 		{
 			int count = read(fd, rx_tx_buf, 7);
@@ -324,7 +324,7 @@ static int sx150x_init()
 
 	for(i = 0; i < 999;i++)
 	{
-		sprintf(rx_tx_buf,"/sys/bus/i2c/devices/%x-003e/name",i);
+		snprintf(rx_tx_buf, sizeof(rx_tx_buf), "/sys/bus/i2c/devices/%x-003e/name",i);
 		if((fd = open(rx_tx_buf, O_RDONLY)) != -1)
 		{
 			int count = read(fd, rx_tx_buf, 7);
@@ -340,7 +340,7 @@ static int sx150x_init()
 		}
 	}
 
-        sprintf(rx_tx_buf, "/dev/i2c-%d",bus_num);
+        snprintf(rx_tx_buf, sizeof(rx_tx_buf), "/dev/i2c-%d",bus_num);
         if((_fd = open(rx_tx_buf, O_RDWR)) < 0)
         {
                 return -1;
